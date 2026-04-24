@@ -1,19 +1,20 @@
-from langchain.tools import tool
 from crewai import Agent, Task, Crew
+from langchain.tools import Tool
 from duckduckgo_search import DDGS
 
 # -------- TOOL --------
-@tool
-def search_tool(query: str) -> str:
-    """Search the web for company information"""
+def search_tool_func(query):
     results = []
-    from duckduckgo_search import DDGS
-
     with DDGS() as ddgs:
         for r in ddgs.text(query, max_results=5):
             results.append(r['body'])
-
     return "\n".join(results)
+
+search_tool = Tool(
+    name="Company Search",
+    func=search_tool_func,
+    description="Search the internet for company information"
+)
 # -------- INPUT --------
 company_name = input("Enter company name: ")
 
