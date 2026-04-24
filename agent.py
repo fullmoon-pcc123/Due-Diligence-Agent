@@ -1,10 +1,18 @@
 from crewai import Agent, Task, Crew
-from langchain.tools import DuckDuckGoSearchRun
+from duckduckgo_search import DDGS
 
-# Tool
-search_tool = DuckDuckGoSearchRun()
+# -------- TOOL --------
+def search_tool(query):
+    results = []
+    with DDGS() as ddgs:
+        for r in ddgs.text(query, max_results=5):
+            results.append(r['body'])
+    return "\n".join(results)
 
-# Agent
+# -------- INPUT --------
+company_name = input("Enter company name: ")
+
+# -------- AGENT --------
 research_agent = Agent(
     role="Due Diligence Analyst",
     goal="Find company information and identify risks",
@@ -13,19 +21,19 @@ research_agent = Agent(
     verbose=True
 )
 
-# Task
+# -------- TASK --------
 task = Task(
-    description="Research the company 'Infosys India' and provide risk insights",
+    description=f"Research the company '{company_name}' and provide risk insights",
     agent=research_agent
 )
 
-# Crew
+# -------- CREW --------
 crew = Crew(
     agents=[research_agent],
     tasks=[task]
 )
 
-# Run
+# -------- RUN --------
 result = crew.kickoff()
+print("\nFINAL OUTPUT:\n")
 print(result)
-
